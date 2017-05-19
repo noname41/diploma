@@ -96,4 +96,4 @@ if __name__ == '__main__':
 	example_search(str)
 	#print '-----------------------способ 2---------------------'
 	#compute_tf(str)
-	print 'Keyword dictionary:\n ', dictionary,unicode('utf-8')
+	print 'Keyword dictionary:\n ', dictionary#.unicode('utf-8')
