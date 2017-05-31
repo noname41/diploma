@@ -1,0 +1,8 @@
+﻿Список установленных библиотек для работы:
+1. pymorphy, pymorphy2
+2. nltk
+3. mystem3
+4. beautifil soup 4
+5. urllib 3 (не использовалась)
+6. graphviz
+7. pybrain(?)
