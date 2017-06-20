@@ -1,117 +1,84 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+import sys
 import re
-import pymorphy2
-morph = pymorphy2.MorphAnalyzer()
 import nltk
-from nltk.collocations import *
-from collections import defaultdict
-from nltk.corpus import stopwords
-from bs4 import BeautifulSoup
-import urllib3
-import requests
+import string
+import collections
+import pymorphy2
+import nltk
+morph = pymorphy2.MorphAnalyzer()
+from pymystem3 import Mystem
+m=Mystem()
 
-
-
-def alloc_colloc(text):
-	bigram_measures = nltk.collocations.BigramAssocMeasures()
-	trigram_measures = nltk.collocations.TrigramAssocMeasures()
-	delete_zn = re.compile(u'\W+?', re.UNICODE)
+def text_to_token(text):  #разбиваем на токены, избавляемся от зн. преп.
 	text = text.split()
 	a=[]
 	for word in text:
 		word = morph.parse(delete_zn.sub('', word))[0]
-		if word.tag.POS in ('NOUN', 'ADJF', 'ADJS', 'VERB','INFN'):
-				a.append(word.normal_form)
-	text = a
-
-	
-	finder = BigramCollocationFinder.from_words(text)
-	finder.apply_freq_filter(1)
-	#finder.apply_word_filter(lambda w: len(w) < 3 or w.lower() in stop_words) 
-	#f = finder.nbest(bigram_measures.pmi, 25)
-
-	lik = finder.score_ngrams(bigram_measures.likelihood_ratio)
-	pm = finder.score_ngrams(bigram_measures.pmi)
-	sq = finder.score_ngrams(bigram_measures.dice) #chi_sq
-	stt = finder.score_ngrams(bigram_measures.student_t)
-
-	#f = open ('/media/share/results.txt', 'w')
-	list_of_colloc = []
-	
-	print('-------------')
-	print('-------------')
-	print('Метрика likelyhood:')
-	for col in lik[1:50]:
-		print(col[0],'       ',col[1])
-	
-	print('-------------')
-	print('Метрика pmi:')
-	for col in pm[1:50]:
-		list_of_colloc.append(col[0])
-		print(col[0],'       ',col[1])
-
-	print('-------------')
-	print('Метрика dice:')
-	for col in sq[1:50]:
-		print(col[0],'       ',col[1])
-
-	print('-------------')
-	print('Метрика student_t:')
-	for col in stt[1:50]:
-		print(col[0],'       ',col[1])
-	
-	return list_of_colloc
+		if word.tag.POS == 'NOUN':
+		#	print(word.normal_form)
+			a.append(word.normal_form)
+	return a
 
 
-def search_meanword(query):
-	print('-----------')
-	print('-----------')
-	list_dict= ['Википедия','Большой Энциклопедический словарь', 'Большая советская энциклопедия','Фразеологический словарь русского литературного языка']
-	link=''
-	query.lower()
-	query.replace (" ", "+")
-	r = requests.get('http://dic.academic.ru/searchall.php?SWord='+query+'&from=xx&to=ru&did=&stype=0')
-	soup = BeautifulSoup(r.text ,"html.parser")
-	q=bool(0)
-	i=1
-	for items in soup.find_all('ul', attrs={'class' : 'terms-list'}):#, attrs={'li' : 'r'}):
-		for it in items.find_all('li'):
-			if it.p.strong.a.text.find(query) != -1: 
-				link = it.a['href']
-				print(it.p.text)
-				#print(it.p.text)
-				print(it.find('p',attrs={'class':'src'}).text + '\n')
-				q=bool(1)
+#text_s = [i for i in text_s if ( i not in string.punctuation )]
+def example_search(a): # freqdist подсчитывет кол-во раз употребления слова в тексте
+	words = nltk.FreqDist(a)
+	print('Count of words(noun) in text: ',len(words))
+	l_words = list(words.items())
+	l_words.sort(key=lambda i:i[1],reverse=1)
+	l_words = l_words[:10]
+	print('frequent words (keywords): ')
+	for word in l_words:
+		#word_to_dict(word[0])
+		print(word[0], word[1]/len(words))
+	return l_words
 
-	meaning_str = ''
-	if link != '':
-		r1 = requests.get(link)
-		soup1 = BeautifulSoup(r1.text,'html.parser')
-		for items in soup1.find_all('div', attrs={'class' : 'content'}):
-			temp = items.find('dd',attrs={'class':'descript'})
-			for p in temp.find_all('p'):
-				i+=1
-				if i in range(2,8):
-					print(p.text + '\n')
-					meaning_str+=p.text + '\n'
-					
+def word_to_dict(word):
+
+	lemma = m.analyze(word)
+	temp = lemma[0]['analysis'][0]['gr']
+	temp_part = temp.split(',')[0]
+	temp_gen = temp.split(',')[1]
+	temp_od = temp.split(',')[2].split('=')[0]  #для существительных
+	if temp.find('(') != -1:
+	#	#возможноые падежы 
+		temp_c =  temp.split('(')[1].split(',')[0] + "/" + temp.split('(')[1].split('|')[1].split(',')[0]
+		#возможные числа(ед,мн)
+		temp_sp = temp.split('(')[1].split(',')[1].split('|')[0] + "/" + temp.split('(')[1].split('|')[1].split(',')[1].split(')')[0]
 	else:
-		print('Словарных статей не найдено')
-	return meaning_str
+		temp_c = temp.split('=')[1].split(',')[0] 
+		temp_sp = temp.split('=')[1].split(',')[1]
+
+	#print temp_c, '  ', temp_sp
+
+	dictionary[word] = {"part_of_speech":temp_part , "characteristic":temp_od, "case":temp_c , "sing/plur":temp_sp}
+
+def compute_tf(text):
+#На вход берем текст в виде списка (list) слов
+    #Считаем частотность всех терминов во входном массиве с помощью 
+    #метода Counter библиотеки collections
+	tf_text = collections.Counter(text)
+	for i in tf_text:
+        #для каждого слова в tf_text считаем TF путём деления
+        #встречаемости слова на общее количество слов в тексте
+		tf_text[i] = tf_text[i]/float(len(text))
+    #возвращаем объект типа Counter c TF всех слов текста
+	tf_text[1].sort(key=lambda i:i[1],reverse=1)
+	tf_text = tf_text[:10]
+	return tf_text	
 
 
-
-
-stop_words = stopwords.words('russian')
-f = open ('/media/share/ref1.txt', 'r')
+f = open ('/media/share/usa.txt', 'r')
 text = f.read()
-collocs = []
-meaning = {}
-collocs = alloc_colloc(text)
-#for col in collocs:
-#	col = col[0]+' '+col[1]	
-	#meaning[col] = {'Словарная статья':(search_meanword(col))}
-#print(meaning)
+delete_zn = re.compile(u'\W+?', re.UNICODE)
+#text1 = unicode(text, 'utf-8')
+dictionary = {} 
 
-# словарные статьи - находим коллоки, записываем в словарь и дальше в графвиз	
+if __name__ == '__main__':
+	str1 = text_to_token(text)
+	example_search(str1)
+	#print('Keyword dictionary:\n ', dictionary)
+#	print(compute_tf(str1))
