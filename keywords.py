@@ -22,45 +22,45 @@ def alloc_colloc(text):
 	for word in text:
 		word = morph.parse(delete_zn.sub('', word))[0]
 		if word.tag.POS in ('NOUN', 'ADJF', 'ADJS', 'VERB','INFN'):
-			a.append(word.word)
+				a.append(word.normal_form)
 	text = a
 
 	
 	finder = BigramCollocationFinder.from_words(text)
-	finder.apply_freq_filter(2)
-	finder.apply_word_filter(lambda w: len(w) < 3 or w.lower() in stop_words) 
+	finder.apply_freq_filter(1)
+	#finder.apply_word_filter(lambda w: len(w) < 3 or w.lower() in stop_words) 
 	#f = finder.nbest(bigram_measures.pmi, 25)
 
 	lik = finder.score_ngrams(bigram_measures.likelihood_ratio)
 	pm = finder.score_ngrams(bigram_measures.pmi)
-	sq = finder.score_ngrams(bigram_measures.chi_sq)
+	sq = finder.score_ngrams(bigram_measures.dice) #chi_sq
 	stt = finder.score_ngrams(bigram_measures.student_t)
 
-
+	#f = open ('/media/share/results.txt', 'w')
 	list_of_colloc = []
+	
 	print('-------------')
-'''
 	print('-------------')
 	print('Метрика likelyhood:')
-	for col in lik[1:30]:
+	for col in lik[1:50]:
 		print(col[0],'       ',col[1])
-'''	
+	
 	print('-------------')
 	print('Метрика pmi:')
-	for col in pm[1:30]:
+	for col in pm[1:50]:
 		list_of_colloc.append(col[0])
 		print(col[0],'       ',col[1])
-'''
+
 	print('-------------')
-	print('Метрика chi_square:')
-	for col in sq[1:30]:
+	print('Метрика dice:')
+	for col in sq[1:50]:
 		print(col[0],'       ',col[1])
 
 	print('-------------')
 	print('Метрика student_t:')
-	for col in stt[1:30]:
+	for col in stt[1:50]:
 		print(col[0],'       ',col[1])
-	'''
+	
 	return list_of_colloc
 
 
@@ -104,14 +104,14 @@ def search_meanword(query):
 
 
 stop_words = stopwords.words('russian')
-f = open ('/media/share/example1.txt', 'r')
+f = open ('/media/share/ref1.txt', 'r')
 text = f.read()
 collocs = []
 meaning = {}
 collocs = alloc_colloc(text)
-for col in collocs:
-	col = col[0]+' '+col[1]	
-	meaning[col] = {'Словарная статья':(search_meanword(col))}
-print(meaning)
+#for col in collocs:
+#	col = col[0]+' '+col[1]	
+	#meaning[col] = {'Словарная статья':(search_meanword(col))}
+#print(meaning)
 
 # словарные статьи - находим коллоки, записываем в словарь и дальше в графвиз	
