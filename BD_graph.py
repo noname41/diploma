@@ -20,25 +20,25 @@ conn = sqlite3.connect('test3.db')
 c = conn.cursor()
 
 # Create table
-c.execute("drop table denotat")
-c.execute("drop table direction")
-c.execute("drop table communications")
+c.execute("drop table if exists denotat")
+c.execute("drop table if exists direction")
+c.execute("drop table if exists communications")
 
-c.execute("""CREATE TABLE denotat
+c.execute("""CREATE TABLE  denotat
 	( 
 	id_denotat int PRIMARY_KEY,
 	name_denotat text 
 	)
 	""") 
 
-c.execute("""CREATE TABLE direction
+c.execute("""CREATE TABLE  direction
 	( 
 	id_direct int PRIMARY_KEY,
 	name_direction text 
 	)
 	""")
 
-c.execute("""CREATE TABLE communications 
+c.execute("""CREATE TABLE  communications 
 	( 
 	id_comm int PRIMARY KEY, 
 	den1 int, 
@@ -222,6 +222,9 @@ g2 = gv.Digraph(format='png')
 count=1
 d1=den_d.copy()
 #print(den_d.items())
+
+#№постройка графа
+'''
 for a in d1:
 	if a not in range(460,720,10) and a not in (770,780):
 		#print(den_d[a]["den"]) #добавляем вершину shape box
@@ -238,6 +241,7 @@ for a in d1:
 #print(com_d)
 #for k in sorted(den_d.keys()):
 	#print(k, ':', den_d[k])
+
 count=0
 for a in com_d:
 	#если в вершине 4 нет 550, но есть вершина 5(непустая) и/или 6, то просто две связи, иначе в зависимости от и тд как в граф.пайы
@@ -269,7 +273,7 @@ for a in com_d:
 	else:
 		count+=1
 		temp = d1[a3]["den"] + str(count)
-		print(temp)
+		#print(temp)
 		if a7 != 0:
 			g2.edge(d1[a1]["den"], temp , style = stl )
 			g2.edge(temp, d1[a4]["den"])
@@ -289,7 +293,7 @@ g2.render('img/denotat')
 # We can also close the connection if we are done with it.
 # Just be sure any changes have been committed or they will be lost.
 conn.close()
-
+'''
 edge_count = 0;
 node_count = 0;
 for a in com_d:
@@ -302,18 +306,15 @@ for a in com_d:
 				if com_d[a]["den7"] == 0 : edge_count+=5
 
 node_count = len(range(10,460,10)) + len(range(720,770,10)) +5
-print('количество вершин: ', node_count, '  ', 'количество ребер: ', edge_count)
+#print('количество вершин: ', node_count, '  ', 'количество ребер: ', edge_count)
 
-#list_sm=[300,554,150,360,50,410,10,330,430,170,390,250,552,180,140,240,70,350,220,551,210,90,80,200,370,190,30,550,290,160,20,380,553,40,310,100]
 list_sm = [i for i in range(10,460,10)]#
 list_sm.extend([i for i in range(720,770,10)])
 list_sm.extend([i for i in range(550,555,1)])
-#print(list_sm)
+
 list_sm1 = sorted(list_sm)
-#list_smm = {}
-#list_smm = list_smm.fromkeys(list_sm1, [])
+
 list_smm=[]
-#print(list_smm)
 for c in range(len(list_sm1)):
 	a = list_sm1[c]
 
@@ -322,23 +323,23 @@ for c in range(len(list_sm1)):
 		for b in com_d:		
 			if com_d[b]["den1"] == a:
 				if com_d[b]["den3"] in (550, 551, 552, 553, 554):
-					#if list_smm.setdefault(a) == None:
+				
 					list_smm[c].append(list_sm1.index(com_d[b]["den3"]))
 						
 				else:
 					if com_d[b]["den4"] == 0:
-						#if list_smm.setdefault(a) == None:
+						
 						list_smm[c].append(list_sm1.index(com_d[b]["den3"]))
 				
 					else:
 						if com_d[b]["den5"] == 0:
-							#if list_smm.setdefault(a) == None:
+						
 							list_smm[c].append(list_sm1.index(com_d[b]["den3"]))
 							list_smm[c].append(list_sm1.index(com_d[b]["den4"]))
 							
 						else:
 							if com_d[b]["den6"] == 0:
-							#	if list_smm.setdefault(a) == None:
+							
 								list_smm[c].append(list_sm1.index(com_d[b]["den3"]))
 								list_smm[c].append(list_sm1.index(com_d[b]["den4"]))
 								list_smm[c].append(list_sm1.index(com_d[b]["den5"]))
@@ -348,65 +349,24 @@ for c in range(len(list_sm1)):
 		for b in com_d:
 			if com_d[b]["den3"] == a:
 				if com_d[b]["den7"] == 0:
-					#if list_smm.setdefault(a) == None:
-					#list_smm[c].append(com_d[b]["den3"])
+			
 					list_smm[c].append(list_sm1.index(com_d[b]["den4"]))
 					list_smm[c].append(list_sm1.index(com_d[b]["den5"]))
 					list_smm[c].append(list_sm1.index(com_d[b]["den6"]))
 			
 				else:
-					#if list_smm.setdefault(a) == None:
-					#list_smm[c].append(com_d[b]["den3"])
+					
 					list_smm[c].append(list_sm1.index(com_d[b]["den4"]))
 					list_smm[c].append(list_sm1.index(com_d[b]["den5"]))
 					list_smm[c].append(list_sm1.index(com_d[b]["den6"]))
 					list_smm[c].append(list_sm1.index(com_d[b]["den7"]))
-		
-#list_smm = OrderedDict(sorted(list_smm.items(), key=lambda t: t[0]))
-#print(list_smm[list_sm1.index(310)])
+#list_smm - список смежности 0 - [,,,] , 1- [,,,] ...
+#матрица смежности
+matrix = [[0] * len(list_smm) for i in range(len(list_smm))]
+for j in range(len(list_smm)) : 
+	for i in list_smm[j]:  
+		matrix[j][i] =matrix[i][j]= 1		
 
-#for i in range(len(list_sm1)):	
-#	print(list_sm1[i],'   ',list_smm[i])
-#print(len(list_smm), '  '  ,len(list_sm))
-
-visited = [False for i in range(len(list_smm))] #массив для хранения информации о пройденных и не пройденных вершинах
-path=[]
-path1=[]
-word='Молекулярные слои'
-word1='Величина скорости изменения'
-
-def dfs(v):
-	q=False
-	#print(v, '    ',len(path))
-	#if path != []:
-	#	if v+1 < path[len(path)-1]: 
-		##	path.clear()
-	path.append(v+1)
-	#q = False
-	visited[v] = True
-	'''if list_smm[v] == []: 
-		
-		for a in range(len(path)):
-			path1.append([])
-			path1[a].append(a)
-		path.clear()'''
-	for vertex in list_smm[v]:  #задаю слово - ищет его в дереве, сохраняет путь до него
-		if word1 == d1[list_sm1[vertex]]["den"]:
-			#print('=====')
-			#print(path)
-			#print('=====')
-			q=True
-		if not visited[vertex] and not q:
-			#print(path)
-			dfs(vertex)
-				
-
-dfs(list_sm1.index(10))
-#print(path1)
-#for a in path:
-#	print(d1[list_sm1[a]]["den"])
-#print(list_smm)
-#print(visited)
 
 def alloc_colloc(text):
 	bigram_measures = nltk.collocations.BigramAssocMeasures()
@@ -434,30 +394,129 @@ def alloc_colloc(text):
 	#f = open ('/media/share/results.txt', 'w')
 	list_of_colloc = []
 	
-	print('-------------')
-	print('-------------')
-	print('Метрика likelyhood:')
+	#print('-------------')
+	#print('-------------')
+	#print('Метрика likelyhood:')
 	for col in lik[1:50]:
 		list_of_colloc.append(col[0])
-		#print(col[0],'       ',col[1])
+			#print(col[0],'       ',col[1])
 	return list_of_colloc
 
+def search_meanword(query):
+	#print('-----------')
+	#print('-----------')
+	list_dict= ['Википедия','Большой Энциклопедический словарь', 'Большая советская энциклопедия','Фразеологический словарь русского литературного языка']
+	link=''
+	query.lower()
+	query.replace (" ", "+")
+
+	r = requests.get('http://dic.academic.ru/searchall.php?SWord='+query+'&from=xx&to=ru&did=&stype=')
+	soup = BeautifulSoup(r.text ,"html.parser")
+	q1=bool(0)
+	i=1
+	for items in soup.find_all('ul', attrs={'class' : 'terms-list'}):#, attrs={'li' : 'r'}):
+		for it in items.find_all('li'):
+			if it.p.strong.a.text.find(query) != -1: 
+				link = it.a['href']
+				#print(it.p.text)
+				#print(it.find('p',attrs={'class':'src'}).text + '\n')
+				q1=bool(1)
+	return link
+
+def get_meanword(link):	
+	meaning_str = -2
+	if link != '':
+		r1 = requests.get(link)
+		soup1 = BeautifulSoup(r1.text,'html.parser')
+		for items in soup1.find_all('div', attrs={'class' : 'content'}):
+			temp = items.find('dd',attrs={'class':'descript'})
+			for p in temp.find_all('p'):
+				i+=1
+				if i in range(2,8):
+					print(p.text + '\n')
+					meaning_str+=p.text + '\n'
+	return meaning_str
+
+
+
+visited = [False for i in range(len(list_smm))] #массив для хранения информации о пройденных и не пройденных вершинах
+path=[]
+
+word='Молекулярные слои'
+#word1='Величина скорости изменения'
+
+def dfs(v):
+	#print(word)
+	q=False
+	path.append(v+1)
+	visited[v] = True
+	for vertex in list_smm[v]:  #задаю слово - ищет его в дереве, сохраняет путь до него
+		if word == d1[list_sm1[vertex]]["den"] or d1[list_sm1[vertex]]["den"].find(word) != -1 :
+			q=True
+		if not visited[vertex] and not q:
+			#print(path)
+			dfs(vertex)
+	return q	
+
+#word=''
 strr=[]
-referat={}
+referat=[]
 stop_words = stopwords.words('russian')
 f = open ('/media/share/ref3.txt', 'r')
 text = f.read()
 collocs = []
 meaning = {}
+
 collocs = alloc_colloc(text)
-for a in d1:
-	strr.append(d1[a]["den"])
+
 for col in collocs:
-	if not dfs(col):
-		col.split()
-		a=col[0]
-		b=col[1]
+	col = col[0]+' '+col[1]	
+	if search_meanword(col) != '':
+		meaning[col] = 1
 	else:
-		for p in path:
-			temp.append(d1[list_sm1.index(p)]["den"])
-	referat.append(temp)
+		meaning[col] = -1
+		#print(col)
+		col1 = col.split()
+
+		if len(col1) > 1:
+			if col1[0] != '':
+				a=col1[0]
+				if search_meanword(a) != '':
+				#	meaning[a] = 1
+					meaning[col] = 0
+
+			if col1[1] != '':	
+				b=col1[1]
+				if search_meanword(b) != '':
+				#	meaning[b] = 1 
+					meaning[col] = 0
+		else:
+			if search_meanword(col1[0]) != '':
+				#print(search_meanword(col1[0]))
+				meaning[col] = 0
+
+m1=sorted(meaning.items(),key=lambda x:x[1],reverse=True) ## получается много 0-взвешенных коллокаций из-за поиска по каждому слову
+														  ## определяются словарными статьями глаголы, числительные и тд
+
+### Поиск коллокаций в графе - не работает.
+for mean in m1:
+	word=str(mean[0]).capitalize()		
+	if dfs(list_sm1.index(10)):
+		referat.append(mean[0])
+	else:
+		word1 = str(word).split()
+		if len(word1) > 1:
+			if word1[0] != '':
+				word = word1[0].capitalize()
+				if dfs(list_sm1.index(10)):
+					referat.append(mean[0])
+
+			if word1[1] != '':	
+				word = word1[1].capitalize()
+				if dfs(list_sm1.index(10)):
+					referat.append(mean[0])
+		else:
+			word = str(word1)[0].capitalize()
+			if dfs(list_sm1.index(10)):
+				referat.append(mean[0])
+print(referat)
