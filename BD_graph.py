@@ -223,8 +223,7 @@ count=1
 d1=den_d.copy()
 #print(den_d.items())
 
-#№постройка графа
-'''
+
 for a in d1:
 	if a not in range(460,720,10) and a not in (770,780):
 		#print(den_d[a]["den"]) #добавляем вершину shape box
@@ -293,7 +292,7 @@ g2.render('img/denotat')
 # We can also close the connection if we are done with it.
 # Just be sure any changes have been committed or they will be lost.
 conn.close()
-'''
+
 edge_count = 0;
 node_count = 0;
 for a in com_d:
